@@ -1,0 +1,126 @@
+<html>
+<head>
+	<meta charset='utf-8'>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<script>
+	$(document).ready(function(){
+		$("#textinput").keyup(function(){
+			if($("#textinput").val() == ""){
+				document.getElementById("textHint").innerHTML = "검색어가 없습니다.";
+			}
+			else {
+				$.get("http://cspro.sogang.ac.kr/~cse20151521/cgi-bin/my_ajax_search.php?input="+$("#textinput").val(), function(data, status){
+					document.getElementById("textHint").innerHTML = data;
+				});
+			}
+		});
+	});
+		
+	$(window).load(function(){
+		$('#loading').hide();
+	}); 
+	
+	function toAjax(){
+		var formData = $('#myform').serialize();
+		var isChecked = document.getElementsByName('ckb');
+		var theForm = document.frm;
+		if(theForm.input.value == "") {
+			alert("키워드를 입력하세요.");
+			return;
+		}
+		var flag = false;
+		for (var i = 0; i< isChecked.length; i++){
+			if(isChecked[i].checked){ flag = true; break; }
+		}
+		if(!flag){
+			alert("원하는 공지사항을 체크하세요.");
+			return;
+		}
+		
+		$.ajax({
+			type:'get',
+			url:'cgi-bin/my_search.php',
+			data: formData,
+			dataType: 'json',
+			error: function(xhr, status, error){
+				alert(error);
+			},
+			success: function(json){
+				var temp = document.getElementById("display");
+				var tbody = temp.getElementsByTagName("tbody");
+				tbody[0].innerHTML = "";
+				$.each(json, function(key, value){
+					for(var i = 0 ; i < value.length; i++){
+						var str = "<tr>";
+						str += "<td><center>" + value[i].domain + "</center></td>";					
+						str += "<td>" + value[i].title + "</td>";
+						str += "<td>" + value[i].date + "</td>";
+						str += "</tr>";
+						
+						tbody[0].innerHTML += str;
+					}
+				})
+			}
+		});
+	}
+	</script>
+</head>
+
+<body>
+	<meta charset='utf-8'>
+	<link rel="stylesheet" href="desktop.css">
+	<link rel="stylesheet" href="mobile.css">
+
+	<!-- 	loading -->
+	<div id = "loading">
+		<img id="loading-image" src = "loading.gif" alt="Loading..."/>
+	</div>
+	
+	<!-- start -->
+	<iframe src="cgi-bin/crawling4.php"style="visibility:hidden;display:none"></iframe>
+	<iframe src="cgi-bin/crawling3.php"style="visibility:hidden;display:none"></iframe>
+	<iframe src="cgi-bin/crawling1.php"style="visibility:hidden;display:none"></iframe>
+	<iframe src="cgi-bin/crawling2.php"style="visibility:hidden;display:none"></iframe>
+	
+	<center>
+		<div id="inputForm">
+			<a href = "https://www.sogang.ac.kr" target="_blank"><img src="sogang.png"></a>
+			<h1>Welcome to Sogang notification</h1>
+	
+			<form id="myform" name="frm" onsubmit = "return false;" method="POST">
+				<input type="text" placeholder="ex) 도서관" name="input" id ="textinput">
+				<input type="button" value="Submit" id = "bt" onclick="toAjax(); return false;">
+				<p> <span id="textHint"></span></p>
+				<p> 
+					<input type="checkbox" name="ckb" value="1">장학
+					<input type="checkbox" name="ckb" value="2">일반
+					<input type="checkbox" name="ckb" value="3">학사
+					<input type="checkbox" name="ckb" value="4">코로나
+				</p>
+			</form>
+		</div>
+		
+		
+		<table id = "display">
+			<thead>
+				<tr>
+					<th>
+						공지사항
+					</th>
+					<th>
+						제목
+					</th>
+					<th>
+						등록일
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+
+			</tbody>
+		</table>
+	
+	</center>
+
+</body>
+</html>
